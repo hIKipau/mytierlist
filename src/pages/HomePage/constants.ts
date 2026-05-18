@@ -1,7 +1,6 @@
 import type { HomePageAuthEndpoints } from "./types";
 
 export const AUTH_ENDPOINTS: HomePageAuthEndpoints = {
-  // Заглушки: подставь реальные endpoint-ы backend-а.
-  login: "/api/auth/login",
-  signup: "/api/auth/signup",
+  login: "/api/v1/auth/login",
+  signup: "/api/v1/auth/register",
 };

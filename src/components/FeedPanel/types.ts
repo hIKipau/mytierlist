@@ -10,4 +10,6 @@ export type FeedItem = {
 
 export type FeedPanelProps = {
   items: FeedItem[];
+  authUser: string | null;
+  onNewPost: (post: FeedItem) => void;
 };

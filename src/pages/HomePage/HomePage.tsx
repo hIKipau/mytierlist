@@ -2,18 +2,22 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import CreateTierlistPanel from "../../components/CreateTierlistPanel/CreateTierlistPanel";
 import FeedPanel from "../../components/FeedPanel/FeedPanel";
 import { FEED_PREVIEW } from "../../components/FeedPanel/constants";
+import type { FeedItem } from "../../components/FeedPanel/types";
 import Footer from "../../components/Footer/Footer";
 import Header from "../../components/Header/Header";
 import Modal from "../../components/Modal/Modal";
 import { MODAL_CONFIG } from "../../components/Modal/constants";
 import type { ModalConfig, ModalName } from "../../components/Modal/types";
 import NavigationPanel from "../../components/NavigationPanel/NavigationPanel";
-import { submitAuthRequest } from "./api";
+import { getStoredLogin, logout, setOnSessionExpired, submitAuthRequest } from "./api";
+import type { AuthPayload, AuthSubmitResult } from "../../components/Modal/types";
 
 function HomePage() {
   const [openModalName, setOpenModalName] = useState<ModalName | null>(null);
+  const [feedItems, setFeedItems] = useState<FeedItem[]>(FEED_PREVIEW);
   const [nicknameQuery, setNicknameQuery] = useState("");
   const [searchStatus, setSearchStatus] = useState("");
+  const [authUser, setAuthUser] = useState<string | null>(getStoredLogin);
   const lastFocusedRef = useRef<HTMLElement | null>(null);
 
   const openModal = useCallback(
@@ -39,6 +43,28 @@ function HomePage() {
     setOpenModalName(name);
   }, []);
 
+  const handleAuthSubmit = useCallback(
+    async (name: ModalName, payload: AuthPayload): Promise<AuthSubmitResult> => {
+      const result = await submitAuthRequest(name, payload);
+      if (result.ok) setAuthUser(payload["login"] ?? null);
+      return result;
+    },
+    [],
+  );
+
+  const handleLogout = useCallback(async () => {
+    await logout();
+    setAuthUser(null);
+  }, []);
+
+  const handleNewPost = useCallback((post: FeedItem) => {
+    setFeedItems(prev => [post, ...prev]);
+  }, []);
+
+  useEffect(() => {
+    setOnSessionExpired(() => setAuthUser(null));
+  }, []);
+
   const handleNicknameSearch = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -49,7 +75,6 @@ function HomePage() {
         return;
       }
 
-      // Заглушка под backend-поиск.
       setSearchStatus(`Ищем пользователя @${query}...`);
       console.info("[stub] nickname search:", query);
     },
@@ -82,7 +107,12 @@ function HomePage() {
   return (
     <>
       <div className="app">
-        <Header onLoginClick={() => openModal("login")} onSignupClick={() => openModal("signup")} />
+        <Header
+          authUser={authUser}
+          onLoginClick={() => openModal("login")}
+          onSignupClick={() => openModal("signup")}
+          onLogout={handleLogout}
+        />
 
         <main className="main">
           <div className="main-grid">
@@ -92,7 +122,11 @@ function HomePage() {
               onNicknameChange={setNicknameQuery}
               onSearchSubmit={handleNicknameSearch}
             />
-            <FeedPanel items={FEED_PREVIEW} />
+            <FeedPanel
+              items={feedItems}
+              authUser={authUser}
+              onNewPost={handleNewPost}
+            />
             <CreateTierlistPanel />
           </div>
         </main>
@@ -108,7 +142,7 @@ function HomePage() {
           isOpen={openModalName === name}
           onClose={closeModal}
           onSwitch={switchModal}
-          onSubmit={submitAuthRequest}
+          onSubmit={handleAuthSubmit}
         />
       ))}
     </>

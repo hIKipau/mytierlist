@@ -62,7 +62,7 @@ function Modal({ name, config, isOpen, onClose, onSwitch, onSubmit }: ModalProps
             {config.title}
           </h2>
           <button className="modal-close" type="button" onClick={onClose} aria-label="Close">
-            x
+            ×
           </button>
         </div>
 

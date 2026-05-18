@@ -8,7 +8,7 @@ export const MODAL_CONFIG: ModalConfigMap = {
     switchLabel: "Sign up",
     hintPrefix: "No account?",
     fields: [
-      { label: "Email", type: "email", name: "email", autoComplete: "email" },
+      { label: "Login", type: "text", name: "login", autoComplete: "username" },
       { label: "Password", type: "password", name: "password", autoComplete: "current-password" },
     ],
   },
@@ -19,8 +19,7 @@ export const MODAL_CONFIG: ModalConfigMap = {
     switchLabel: "Log in",
     hintPrefix: "Already have an account?",
     fields: [
-      { label: "Username", type: "text", name: "username", autoComplete: "username" },
-      { label: "Email", type: "email", name: "email", autoComplete: "email" },
+      { label: "Login", type: "text", name: "login", autoComplete: "username" },
       { label: "Password", type: "password", name: "password", autoComplete: "new-password" },
     ],
   },
